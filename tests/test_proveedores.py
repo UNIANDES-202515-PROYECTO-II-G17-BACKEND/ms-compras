@@ -38,10 +38,9 @@ def test_crear_proveedor_exitoso(client, db_session_mock):
     # Arrange
     db_session_mock.query.return_value.filter.return_value.first.return_value = None
 
-    # Simular el comportamiento de db.refresh, que asigna el ID
+    # Simular el comportamiento de db.refresh, que asigna el ID después de crear
     def refresh_side_effect(obj):
         obj.id = uuid4()
-
     db_session_mock.refresh.side_effect = refresh_side_effect
 
     # Act
@@ -52,7 +51,7 @@ def test_crear_proveedor_exitoso(client, db_session_mock):
     data = response.json()
     assert data["nombre"] == proveedor_data_valida["nombre"]
     assert data["documento"] == proveedor_data_valida["documento"]
-    assert UUID(data["id"]) # Check if ID is a valid UUID
+    assert "id" in data and UUID(data["id"])
     db_session_mock.add.assert_called_once()
     db_session_mock.commit.assert_called_once()
 
