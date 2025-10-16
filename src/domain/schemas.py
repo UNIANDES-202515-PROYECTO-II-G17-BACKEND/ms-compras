@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, HttpUrl, ConfigDict
+from pydantic import BaseModel, EmailStr, Field, HttpUrl, ConfigDict, conint, condecimal
 from typing import Optional, List
 from uuid import UUID
 from enum import Enum
@@ -69,3 +69,36 @@ class TerminosCompraOut(BaseModel):
 
 class ProveedorParaProductoOut(ProveedorOut):
     terminos: TerminosCompraOut
+
+class ItemOCIn(BaseModel):
+    producto_id: UUID
+    cantidad: conint(gt=0)
+    precio_unitario: Optional[condecimal(max_digits=14, decimal_places=4)] = None
+    impuesto_pct:    Optional[condecimal(max_digits=5,  decimal_places=2)] = None
+    descuento_pct:   Optional[condecimal(max_digits=5,  decimal_places=2)] = None
+    sku_proveedor:   Optional[str] = Field(None, max_length=128)
+
+class OrdenCompraCreate(BaseModel):
+    proveedor_id: UUID
+    pedido_ref: Optional[UUID] = None     # id del pedido en ms-pedidos
+    moneda: Optional[str] = Field(None, max_length=3)
+    notas: Optional[str]  = Field(None, max_length=500)
+    codigo: Optional[str] = Field(None, max_length=32)  # si no envías, el servicio lo genera
+    items: List[ItemOCIn]
+
+class ItemOCOut(ItemOCIn):
+    id: UUID
+    oc_id: UUID
+
+class OrdenCompraOut(BaseModel):
+    id: UUID
+    codigo: str
+    proveedor_id: UUID
+    pedido_ref: Optional[UUID] = None
+    estado: str
+    subtotal: Optional[condecimal(max_digits=14, decimal_places=4)] = None
+    impuesto_total: Optional[condecimal(max_digits=14, decimal_places=4)] = None
+    total: Optional[condecimal(max_digits=14, decimal_places=4)] = None
+    moneda: Optional[str] = None
+    notas: Optional[str] = None
+    items: List[ItemOCOut] = []

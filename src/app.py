@@ -12,6 +12,7 @@ from src.infrastructure.infrastructure import engine
 from .config import settings
 from .routes.health import router as health_router
 from .routes.proveedores import router as proveedor_router
+from .routes.ordenes_compra import router as oc_router
 
 
 
@@ -55,3 +56,4 @@ app.add_middleware(
 
 app.include_router(health_router)
 app.include_router(proveedor_router)
+app.include_router(oc_router)
